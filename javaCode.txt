@@ -1,0 +1,107 @@
+package com.example.lab_exam;
+
+import android.app.AlertDialog;
+import android.content.DialogInterface;
+import android.os.Bundle;
+import android.view.View;
+import android.widget.ArrayAdapter;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.ListView;
+import android.widget.Toast;
+import androidx.appcompat.app.AppCompatActivity;
+import java.util.ArrayList;
+
+public class MainActivity extends AppCompatActivity {
+
+    private EditText taskEditText;
+    private Button addButton;
+    private Button deleteButton;
+    private Button viewButton;
+    private ListView taskListView;
+    private ArrayList<String> taskList;
+    private ArrayAdapter<String> adapter;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+
+        taskEditText = findViewById(R.id.task_edit_text);
+        addButton = findViewById(R.id.add_button);
+        deleteButton = findViewById(R.id.delete_button);
+        viewButton = findViewById(R.id.view_button);
+        taskListView = findViewById(R.id.task_list_view);
+
+        taskList = new ArrayList<>();
+        adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_single_choice, taskList);
+        taskListView.setAdapter(adapter);
+
+        addButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String task = taskEditText.getText().toString();
+                if (!task.isEmpty()) {
+                    addTask(task);
+                } else {
+                    Toast.makeText(MainActivity.this, "Please enter a task", Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+
+        deleteButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                int position = taskListView.getCheckedItemPosition();
+                if (position != ListView.INVALID_POSITION) {
+                    deleteTask(position);
+                } else {
+                    Toast.makeText(MainActivity.this, "Please select a task to delete", Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+
+        viewButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                showAllTasks();
+            }
+        });
+    }
+
+    private void addTask(String task) {
+        taskList.add(task);
+        adapter.notifyDataSetChanged();
+        taskEditText.getText().clear();
+    }
+
+    private void deleteTask(int position) {
+        taskList.remove(position);
+        adapter.notifyDataSetChanged();
+        Toast.makeText(this, "Task deleted", Toast.LENGTH_SHORT).show();
+    }
+
+    private void showAllTasks() {
+        if (taskList.isEmpty()) {
+            Toast.makeText(this, "No tasks added yet", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        // Convert taskList to an array for the AlertDialog
+        final CharSequence[] tasksArray = taskList.toArray(new CharSequence[taskList.size()]);
+
+        // Create an AlertDialog to display the tasks
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("All Tasks");
+        builder.setItems(tasksArray, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                // Do nothing on item click
+            }
+        });
+        builder.setNegativeButton("Close", null);
+        builder.create().show();
+    }
+}
+
+
